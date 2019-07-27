@@ -1,0 +1,16 @@
+ --- 
+ hosts: testserver
+ become: true
+ tasks:
+    - name: Grub menuentries
+      command: awk -F\' '/menuentry / { print i++, $2}' /boot/grub/grub.cfg
+      register: results
+    - debug: var=results.stdout_lines
+    - pause:
+      prompt: "Choose number from Os:"
+      register: my_pause
+    - debug: var=my_pause.user_input
+    - name: Grub reboot
+      command: grub-reboot {{ my_pause.user_input }}
+    - name: Reboot
+      reboot:
