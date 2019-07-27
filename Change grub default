@@ -1,0 +1,21 @@
+---
+- hosts: all
+  remote_user: user
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+   - name: Grub menuentries
+     command: awk -F\' '/menuentry / { print i++, $2}' /boot/grub/grub.cfg
+     register: results
+   - debug: var=results.stdout_lines
+   - pause:
+      prompt: "Choose number from Os:"
+     register: my_pause
+   - debug: var=my_pause.user_input
+   - name: Change grub defaut
+     command: grub-set-default {{ my_pause.user_input }}
+   - name: Update grub
+     command: update-grub
+   - name: Reboot
+     reboot:
